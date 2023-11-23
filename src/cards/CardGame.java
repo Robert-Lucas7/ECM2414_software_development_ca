@@ -92,7 +92,7 @@ public class CardGame {
                     threads[i].start();
                 }
                 
-                //latch.countDown();
+                latch.countDown();
                 
              } catch(Exception e){
 
