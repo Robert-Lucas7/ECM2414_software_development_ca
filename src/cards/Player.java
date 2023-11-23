@@ -75,6 +75,22 @@ the object-oriented paradigm.
         
         while(this.gameNotFinished){  //Execute the game-playing strategy whilst the game has not finished...
             try{
+                
+                
+                
+                //System.out.println(leftDeck.getDeckNumber()+" Locked this deck");
+                Card cardDrawn = leftDeck.remove(); //this can be null.
+                
+                if(cardDrawn != null){
+                    Card cardRemoved = this.removeCard(); //SORT OUT SO PLAYERS DON'T END WITH THREE CARDS.
+                    
+                
+                    
+                    this.addCard(cardDrawn);
+                    rightDeck.add(cardRemoved); //
+                    System.out.println(this.preferredCard+" drawn: "+cardDrawn.getValue()+" removed: "+cardRemoved.getValue());
+                    this.writeMoveToFile(cardDrawn.getValue(), cardRemoved.getValue()); 
+                }
                 if(this.checkIfWon()){
                     System.out.println("Player"+this.preferredCard+" wins"+Instant.now().toString());
                     for(ActionListener l:listeners){ //Notify the other players that someone has won the game.
@@ -83,7 +99,6 @@ the object-oriented paradigm.
                     System.out.println("Player 1 finished at "+Instant.now().toString());
                 }
                 
-                haveAGo();
                 
                         
                     
@@ -95,26 +110,12 @@ the object-oriented paradigm.
                 
             }
             catch(Exception e){
-                System.out.println(e);
+                e.printStackTrace();
             }
         }
-        System.out.println(this.preferredCard+" Executing");
+        System.out.println(this.preferredCard+" Exiting");
     }
-    private void haveAGo(){
-        try{
-            Card cardRemoved = this.removeCard(); //SORT OUT SO PLAYERS DON'T END WITH THREE CARDS.
-            rightDeck.add(cardRemoved); //
-            if(this.preferredCard == 2){
-                System.out.println(this.preferredCard+" add: "+cardRemoved.getValue()+Instant.now().toString());
-            }
-            Card cardDrawn = leftDeck.remove();
-            this.addCard(cardDrawn);
-            if(this.preferredCard == 2){
-                System.out.println(this.preferredCard+" removed: "+cardDrawn.getValue());
-            }
-            this.writeMoveToFile(cardDrawn.getValue(), cardRemoved.getValue());
-        } catch(Exception e){}
-    }
+    
     
     /** Creates a new player with the following parameters:
      * @param preferredCard The card value that the player will collect and not get rid of.
