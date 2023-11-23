@@ -1,4 +1,6 @@
 package cards;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 // Use LinkedBlockingQueue instead of Concurrent
 
@@ -55,6 +57,14 @@ public class CardDeck {
      */
     public int getDeckNumber(){
         return this.deckNumber;
+    }
+    public String showDeck(){ //Ddoes the order of contents displayed matter.
+        Iterator<Card> iterator = cards.iterator();
+        String s = "";
+        while(iterator.hasNext()){
+            s += iterator.next().getValue()+" ";
+        }
+        return s.stripTrailing();
     }
 
 }

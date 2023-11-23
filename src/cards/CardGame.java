@@ -4,9 +4,6 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 
-//=======================================
-// LOOK INTO HOW TO STRUCTURE THE PACKAGE TO TURN INTO JAR FILE.
-//=======================================
 public class CardGame {
     /** The entry point for the executable
      * @param args
@@ -17,13 +14,15 @@ public class CardGame {
 
             boolean validInput = false;
             Pack pack = null;
-            String fileLocation = "CA_FINAL/pack.txt";
-            int numPlayers = 4;
-            try{
-                pack = new Pack(0);
-                pack.loadPack(fileLocation);
-            } catch(Exception e){}
-            /*
+            String fileLocation = "";//"CA_FINAL/pack.txt";
+            int numPlayers = 2;
+            // try{
+            //     pack = new Pack(numPlayers);
+            //     pack.loadPack(fileLocation);
+            // } catch(Exception e){
+            //     e.printStackTrace();
+            // }
+            
             while(!validInput) {
 
                 try {
@@ -52,7 +51,7 @@ public class CardGame {
                     scan.nextLine();
                 }
             }
-            scan.close();*/
+            scan.close();
 
 
             // Initialise the player and deck arrays with the length specified by the user input for the number of players.
@@ -96,10 +95,7 @@ public class CardGame {
                 latch.countDown();
                 
              } catch(Exception e){
-
+                e.printStackTrace();
              }
-             //Write deck to their own output files at the end of the game
-             
-
     }
 }

@@ -1,14 +1,11 @@
 package cards;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
-public class Player implements Runnable, ActionListener{
+public class Player implements Runnable, GameWonListener{
     private final ArrayList<Card> hand; //When declared as final, the arraylist's methods (add and remove) can still be called but the variable cannot be reassigned.
     private int pointer;
 
@@ -17,24 +14,25 @@ public class Player implements Runnable, ActionListener{
     private final CardDeck rightDeck;
     private final int preferredCard;
     private boolean gameNotFinished;
-    private final ActionListener[] listeners;
+    private final GameWonListener[] listeners;
     private CountDownLatch latch;
 
     /* Method that acts as a response for when a player wins a game, so each player threads terminated elegantly.
     */
+    // =================================================================
+    // I SAW THAT SOMETIMES THE FINAL HAND IS OUTPUTTED BEFORE THE LAST PLAYERS GO.
+    //==================================================================
     @Override
-    public void actionPerformed(ActionEvent e){ //What to do when someone has won.
+    public void gameHasBeenWon(Player playerWhoWon){ //What to do when someone has won.
         this.gameNotFinished = false;
-        System.out.println(this.preferredCard + "Stopping now");
+        // System.out.println(this.preferredCard + "Stopping now");
         //Write "Player i has informed player j that player i has won" to player j's output file.
-        //The source object of this event is a player that has won the game, so cast the object to a player object and write the message to each player's output file.
-
-        int playerWonNumber = ((Player)e.getSource()).getPreferredCard();
+        
         try(FileWriter f = new FileWriter(String.format("player%d_output.txt", this.preferredCard),true)){
-            if(playerWonNumber == this.preferredCard){
+            if(playerWhoWon.getPreferredCard() == this.preferredCard){
                 f.write(String.format("player %d wins\n", this.preferredCard));
             } else{
-                f.write(String.format("player %d has informed player %d that player %d has won\n", playerWonNumber, this.preferredCard, playerWonNumber));
+                f.write(String.format("player %d has informed player %d that player %d has won\n", playerWhoWon.getPreferredCard(), this.preferredCard, playerWhoWon.getPreferredCard()));
             }
             f.write(String.format("player %d exits\n",this.preferredCard));
             f.write(String.format("player %d final hand: %s\n", this.preferredCard, this.showHand()));
@@ -51,6 +49,13 @@ public class Player implements Runnable, ActionListener{
         } catch(IOException e){}
     }
     
+    private void writeDeckContentsToFile(){
+        try(FileWriter f = new FileWriter(String.format("deck%d_output.txt", this.leftDeck.getDeckNumber()), false)){
+            f.write(String.format("deck %d contents: %s", this.leftDeck.getDeckNumber(), this.leftDeck.showDeck()));
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+    }
     /** Method required for the Runnable interface and implements game-playing strategy for when the player thread is started.
      */
     //========================================== IMPORTANT ========================================================
@@ -67,53 +72,31 @@ the object-oriented paradigm.
     public void run(){
         writeInitialHandsToFile();
         try{
-            System.out.printf("%s created, blocked by the latch\n", Thread.currentThread().getName());
-            latch.await();
-            System.out.printf("%s started at: %s\n", Thread.currentThread().getName(), Instant.now().toString());
+            latch.await(); // All threads will wait until the CountDownLatch reaches 0.
         }
         catch(InterruptedException e){}
         
         while(this.gameNotFinished){  //Execute the game-playing strategy whilst the game has not finished...
             try{
-                
-                
-                
-                //System.out.println(leftDeck.getDeckNumber()+" Locked this deck");
                 Card cardDrawn = leftDeck.remove(); //this can be null.
-                
-                if(cardDrawn != null){
+                if(cardDrawn != null){ 
                     Card cardRemoved = this.removeCard(); //SORT OUT SO PLAYERS DON'T END WITH THREE CARDS.
-                    
-                
-                    
                     this.addCard(cardDrawn);
-                    rightDeck.add(cardRemoved); //
-                    System.out.println(this.preferredCard+" drawn: "+cardDrawn.getValue()+" removed: "+cardRemoved.getValue());
+                    rightDeck.add(cardRemoved);
                     this.writeMoveToFile(cardDrawn.getValue(), cardRemoved.getValue()); 
                 }
                 if(this.checkIfWon()){
-                    System.out.println("Player"+this.preferredCard+" wins"+Instant.now().toString());
-                    for(ActionListener l:listeners){ //Notify the other players that someone has won the game.
-                        l.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, ""));
+                    System.out.println(String.format("player %d wins", this.preferredCard));
+                    for(GameWonListener l:listeners){ //Notify the other players that someone has won the game.
+                        l.gameHasBeenWon(this);
                     }
-                    System.out.println("Player 1 finished at "+Instant.now().toString());
                 }
-                
-                
-                        
-                    
-                
-                
-                // System.out.println(rightDeck);
-                // System.out.println(leftDeck);
-                
-                
             }
             catch(Exception e){
-                e.printStackTrace();
+                
             }
         }
-        System.out.println(this.preferredCard+" Exiting");
+        writeDeckContentsToFile();
     }
     
     
@@ -123,7 +106,7 @@ the object-oriented paradigm.
      * @param rightDeck The CardDeck where the player puts the cards they removed from their hand.
      * @param listeners An array containing the players in the game.
      */
-    public Player(int preferredCard, CardDeck leftDeck, CardDeck rightDeck, ActionListener[] listeners, CountDownLatch latch ){
+    public Player(int preferredCard, CardDeck leftDeck, CardDeck rightDeck, GameWonListener[] listeners, CountDownLatch latch ){
         this.hand = new ArrayList<>();
         this.preferredCard = preferredCard;
         this.rightDeck = rightDeck;
@@ -178,15 +161,10 @@ the object-oriented paradigm.
      */
     public String showHand(){
         String s = ""; //A string builder may be more efficient but the difference will be negligable for small inputs such as n=4.
-        for (int i=0;i<this.getHandSize();i++){
-            if(i != this.getHandSize() - 1){
-                s += this.hand.get(i).getValue() + " ";
-            } else{
-                s += this.hand.get(i).getValue();
-            }
-
+        for(Card c : this.hand){
+            s += c.getValue() + " ";
         }
-        return s;
+        return s.stripTrailing();
     }
 
     /** Checks if the player has won the game by checking two conditions: if the hand contains four cards and each card in the hand has the same value.
