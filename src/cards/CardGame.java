@@ -2,6 +2,7 @@ package cards;
 
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 
 //=======================================
 // LOOK INTO HOW TO STRUCTURE THE PACKAGE TO TURN INTO JAR FILE.
@@ -15,8 +16,13 @@ public class CardGame {
 
             boolean validInput = false;
             Pack pack = null;
-            String fileLocation = "";
-            int numPlayers = 2;
+            String fileLocation = "CA_FINAL/pack.txt";
+            int numPlayers = 4;
+            try{
+                pack = new Pack(0);
+                pack.loadPack(fileLocation);
+            } catch(Exception e){}
+            /*
             while(!validInput) {
 
                 try {
@@ -45,7 +51,7 @@ public class CardGame {
                     scan.nextLine();
                 }
             }
-            scan.close();
+            scan.close();*/
 
 
             // Initialise the player and deck arrays with the length specified by the user input for the number of players.
@@ -57,11 +63,12 @@ public class CardGame {
                 decks[i] = new CardDeck(i+1);
             }
             // Initialise each player object necessary for the game - with each player having a left and right deck passed into the constructor.
+            CountDownLatch latch = new CountDownLatch(1);
             for(int i=0;i<numPlayers;i++){
                 if(i == 0){
-                    players[i] = new Player(i+1, decks[0], decks[3], players);
+                    players[i] = new Player(i+1, decks[0], decks[3], players, latch);
                 } else{
-                    players[i] = new Player(i+1, decks[i], decks[i-1], players);
+                    players[i] = new Player(i+1, decks[i], decks[i-1], players, latch);
                 }
             }
 
@@ -82,13 +89,15 @@ public class CardGame {
                 Thread[] threads = new Thread[numPlayers];
                 for(int i=0;i<numPlayers;i++){
                     threads[i] = new Thread(players[i]);
+                    threads[i].start();
                 }
-                for(Thread t:threads){
-                    t.start();
-                }
+                
+                //latch.countDown();
+                
              } catch(Exception e){
 
              }
+             //Write deck to their own output files at the end of the game
 
     }
 }

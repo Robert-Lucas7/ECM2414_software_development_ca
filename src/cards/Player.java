@@ -1,8 +1,10 @@
 package cards;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ public class Player implements Runnable, ActionListener{
     private final int preferredCard;
     private boolean gameNotFinished;
     private final ActionListener[] listeners;
+    private CountDownLatch latch;
 
     /* Method that acts as a response for when a player wins a game, so each player threads terminated elegantly.
     */
@@ -55,6 +58,13 @@ the object-oriented paradigm.
      */
      @Override
     public void run(){
+        try{
+            System.out.printf("%s created, blocked by the latch\n", Thread.currentThread().getName());
+            latch.await();
+            System.out.printf("%s started at: %s\n", Thread.currentThread().getName(), Instant.now().toString()    );
+        }
+        catch(InterruptedException e){}
+        
         //Write initial hand to the output file.
         try(FileWriter f = new FileWriter(String.format("player%d_output.txt", this.preferredCard))){
 
@@ -69,6 +79,7 @@ the object-oriented paradigm.
                     for(ActionListener l:listeners){ //Notify the other players that someone has won the game.
                         l.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, ""));
                     }
+                    //writeDeckContentsToFile();
                 }
                 Card cardRemoved = this.removeCard(); //SORT OUT SO PLAYERS DON'T END WITH THREE CARDS.
                 rightDeck.add(cardRemoved); //
@@ -90,6 +101,7 @@ the object-oriented paradigm.
             }
         }
     }
+   
     
     /** Creates a new player with the following parameters:
      * @param preferredCard The card value that the player will collect and not get rid of.
@@ -97,7 +109,7 @@ the object-oriented paradigm.
      * @param rightDeck The CardDeck where the player puts the cards they removed from their hand.
      * @param listeners An array containing the players in the game.
      */
-    public Player(int preferredCard, CardDeck leftDeck, CardDeck rightDeck, ActionListener[] listeners ){
+    public Player(int preferredCard, CardDeck leftDeck, CardDeck rightDeck, ActionListener[] listeners, CountDownLatch latch ){
         this.hand = new ArrayList<>();
         this.preferredCard = preferredCard;
         this.rightDeck = rightDeck;
@@ -105,6 +117,7 @@ the object-oriented paradigm.
         this.pointer = 0;
         this.gameNotFinished = true;
         this.listeners = listeners;
+        this.latch = latch;
     }
 
     /** Removes a card from the player's hand. The card removed is chosen at random from the cards in the hand that are not of the preferred card value.
