@@ -36,14 +36,21 @@ public class Player implements Runnable, ActionListener{
             } else{
                 f.write(String.format("player %d has informed player %d that player %d has won\n", playerWonNumber, this.preferredCard, playerWonNumber));
             }
-            f.write(String.format("player%d exits\n",this.preferredCard));
-            f.write(String.format("player%d final hand: %s\n", this.preferredCard, this.showHand()));
+            f.write(String.format("player %d exits\n",this.preferredCard));
+            f.write(String.format("player %d final hand: %s\n", this.preferredCard, this.showHand()));
 
         } catch(IOException ex){
 
         }
+        
 
     }
+    private void writeInitialHandsToFile(){
+        try(FileWriter f = new FileWriter(String.format("player%d_output.txt", this.preferredCard), false)){
+            f.write(String.format("player %d initial hand: %s\n", this.preferredCard, this.showHand()));
+        } catch(IOException e){}
+    }
+    
     /** Method required for the Runnable interface and implements game-playing strategy for when the player thread is started.
      */
     //========================================== IMPORTANT ========================================================
@@ -58,50 +65,56 @@ the object-oriented paradigm.
      */
      @Override
     public void run(){
+        writeInitialHandsToFile();
         try{
             System.out.printf("%s created, blocked by the latch\n", Thread.currentThread().getName());
             latch.await();
-            System.out.printf("%s started at: %s\n", Thread.currentThread().getName(), Instant.now().toString()    );
+            System.out.printf("%s started at: %s\n", Thread.currentThread().getName(), Instant.now().toString());
         }
         catch(InterruptedException e){}
         
-        //Write initial hand to the output file.
-        try(FileWriter f = new FileWriter(String.format("player%d_output.txt", this.preferredCard))){
-
-        } catch(IOException e){
-
-        }
-        int count = 0;
         while(this.gameNotFinished){  //Execute the game-playing strategy whilst the game has not finished...
             try{
                 if(this.checkIfWon()){
-                    System.out.println("Player"+this.preferredCard+" wins");
+                    System.out.println("Player"+this.preferredCard+" wins"+Instant.now().toString());
                     for(ActionListener l:listeners){ //Notify the other players that someone has won the game.
                         l.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, ""));
                     }
-                    //writeDeckContentsToFile();
+                    System.out.println("Player 1 finished at "+Instant.now().toString());
                 }
-                Card cardRemoved = this.removeCard(); //SORT OUT SO PLAYERS DON'T END WITH THREE CARDS.
-                rightDeck.add(cardRemoved); //
-                Card cardDrawn = leftDeck.remove();
-                this.addCard(cardDrawn);
-                System.out.println(this.preferredCard+": " +this.showHand());
+                
+                haveAGo();
+                
+                        
+                    
+                
+                
                 // System.out.println(rightDeck);
                 // System.out.println(leftDeck);
-                this.writeMoveToFile(cardDrawn.getValue(), cardRemoved.getValue(), count == 0);
-                count++;
+                
                 
             }
-            catch(IndexOutOfBoundsException e){
-                e.printStackTrace();;
-                return;
-            } 
             catch(Exception e){
-                //System.out.println(e);
+                System.out.println(e);
             }
         }
+        System.out.println(this.preferredCard+" Executing");
     }
-   
+    private void haveAGo(){
+        try{
+            Card cardRemoved = this.removeCard(); //SORT OUT SO PLAYERS DON'T END WITH THREE CARDS.
+            rightDeck.add(cardRemoved); //
+            if(this.preferredCard == 2){
+                System.out.println(this.preferredCard+" add: "+cardRemoved.getValue()+Instant.now().toString());
+            }
+            Card cardDrawn = leftDeck.remove();
+            this.addCard(cardDrawn);
+            if(this.preferredCard == 2){
+                System.out.println(this.preferredCard+" removed: "+cardDrawn.getValue());
+            }
+            this.writeMoveToFile(cardDrawn.getValue(), cardRemoved.getValue());
+        } catch(Exception e){}
+    }
     
     /** Creates a new player with the following parameters:
      * @param preferredCard The card value that the player will collect and not get rid of.
@@ -197,13 +210,13 @@ the object-oriented paradigm.
      * @param cardRemoved The card that has been removed from the player's hand.
      * @param isFirstGo A boolean value for if it is the player's first go in the game.
      */
-    public void writeMoveToFile(int cardDrawn, int cardRemoved, boolean isFirstGo){
+    public void writeMoveToFile(int cardDrawn, int cardRemoved){
         String filename = "player" + this.preferredCard + "_output.txt";
         try {
-            FileWriter f = new FileWriter(filename, !isFirstGo);
-            f.write("Player " + this.preferredCard + " draws a " + cardDrawn + " from deck " + this.leftDeck.getDeckNumber() + "\n");
-            f.write("Player " + this.preferredCard + " discards a " + cardRemoved + " to deck " + this.rightDeck.getDeckNumber() + "\n");
-            f.write("Player " + this.preferredCard + " current hand is " + this.showHand() + "\n");
+            FileWriter f = new FileWriter(filename, true);
+            f.write(String.format("player %d draws a %d from deck %d\n", this.preferredCard, cardDrawn, this.leftDeck.getDeckNumber()));
+            f.write(String.format("player %d discards a %d to deck %d\n", this.preferredCard, cardRemoved, this.rightDeck.getDeckNumber()));
+            f.write(String.format("player %d current hand is %s\n", this.preferredCard, this.showHand()));
             f.close();
 
         }catch(IOException e){

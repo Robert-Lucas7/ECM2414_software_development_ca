@@ -1,6 +1,7 @@
 package cards;
 import java.util.ArrayList;
-
+import java.util.concurrent.LinkedBlockingQueue;
+// Use LinkedBlockingQueue instead of Concurrent
 
 /*
  * Look at https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentLinkedQueue.html
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 public class CardDeck {
     /** The cards contained within the deck of cards, acting as a queue.
      */
-    protected ArrayList<Card> cards;
+    protected LinkedBlockingQueue<Card> cards;
     /** The number associated with the deck. 
      */
     private final int deckNumber;
@@ -17,24 +18,21 @@ public class CardDeck {
      * @param deckNumber The number associated with the deck.
      */
     public CardDeck(int deckNumber){
-        cards = new ArrayList<>();
+        cards = new LinkedBlockingQueue<>();
         this.deckNumber = deckNumber;
     }
     /** A thread-safe method to add a card to the card deck.
      * @param cardToAdd The card to add to the deck.
      */
-    public synchronized void add(Card cardToAdd){
-        cards.add(cardToAdd);
+    public void add(Card cardToAdd) throws InterruptedException{
+        cards.put(cardToAdd);
     }
     /** A thread-safe method to remove a card from deck of cards.
      * @return The card removed from the top of the deck.
      * @throws Exception When the deck is empty.
      */
-    public synchronized Card remove() throws Exception{
-        if(cards.size() ==0){
-            throw new Exception("Deck is empty.");
-        }
-        return cards.remove(0);
+    public Card remove() throws InterruptedException{
+        return cards.take();
     }
     /** Gets the number of cards in the deck.
      * @return The number of cards in the deck.

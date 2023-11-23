@@ -12,6 +12,7 @@ public class CardGame {
      * @param args
      */
     public static void main(String[] args){
+
             Scanner scan = new Scanner(System.in);
 
             boolean validInput = false;
@@ -92,12 +93,13 @@ public class CardGame {
                     threads[i].start();
                 }
                 
-                //latch.countDown();
+                latch.countDown();
                 
              } catch(Exception e){
 
              }
              //Write deck to their own output files at the end of the game
+             
 
     }
 }
