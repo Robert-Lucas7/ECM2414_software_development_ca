@@ -14,15 +14,15 @@ public class CardGame {
 
             boolean validInput = false;
             Pack pack = null;
-            String fileLocation = "";//"CA_FINAL/pack.txt";
-            int numPlayers = 2;
-            // try{
-            //     pack = new Pack(numPlayers);
-            //     pack.loadPack(fileLocation);
-            // } catch(Exception e){
-            //     e.printStackTrace();
-            // }
-            
+            String fileLocation = "pack.txt";//"CA_FINAL/pack.txt";
+            int numPlayers = 4;
+            try{
+                pack = new Pack(numPlayers);
+                pack.loadPack(fileLocation);
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+            /*
             while(!validInput) {
 
                 try {
@@ -51,7 +51,7 @@ public class CardGame {
                     scan.nextLine();
                 }
             }
-            scan.close();
+            scan.close();*/
 
 
             // Initialise the player and deck arrays with the length specified by the user input for the number of players.
@@ -64,11 +64,11 @@ public class CardGame {
             }
             // Initialise each player object necessary for the game - with each player having a left and right deck passed into the constructor.
             CountDownLatch latch = new CountDownLatch(1);
-            for(int i=0;i<numPlayers;i++){
-                if(i == 0){
-                    players[i] = new Player(i+1, decks[0], decks[3], players, latch);
+            for(int i=0;i<numPlayers;i++){ // D0  P0 D1  P1   D2   P2   D3   P3
+                if(i == numPlayers - 1){
+                    players[i] = new Player(i+1, decks[numPlayers - 1], decks[0], players, latch);
                 } else{
-                    players[i] = new Player(i+1, decks[i], decks[i-1], players, latch);
+                    players[i] = new Player(i+1, decks[i], decks[i+1], players, latch);
                 }
             }
 

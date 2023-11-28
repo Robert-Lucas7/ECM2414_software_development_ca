@@ -2,7 +2,7 @@ package cards;
 public class Card{
     /** Represents the value of the card.
      */
-    private int value;
+    private final int value;
     /**
      * Creates a card with the specified value.s
      * @param value The value of the card.

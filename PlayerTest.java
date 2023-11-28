@@ -1,4 +1,3 @@
-package test;
 
 import cards.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +23,7 @@ public class PlayerTest {
     public void setUp(){
         deck1 = new CardDeck(1);
         deck2 = new CardDeck(2);
-        player = new Player(1, deck1, deck2, null);
+        player = new Player(1, deck1, deck2, null, null);
     }
 
     //=================================================================== AddCard =====================================================
@@ -163,45 +162,126 @@ public class PlayerTest {
     //=================================================================== writeMoveToFile =====================================================
     @Test
     @DisplayName("Correct output for writeMoveToFile.")
-    public void testWriteMoveToFile_CorrectOutput(){
-        try{
+    public void testWriteMoveToFile_CorrectOutput() {
+        try {
             player.addCard(new Card(3));
             player.addCard(new Card(5));
             player.addCard(new Card(9));
             player.addCard(new Card(2));
-        } catch(Exception e){
+        } catch (Exception e) {
 
         }
-
-        player.writeMoveToFile(5, 8, true);
+        //Delete player1_output.txt so it doesn't interfere with the test.
+        File file = new File("player1_output.txt");
+        file.delete();
+        player.writeMoveToFile(5, 8);
         ArrayList<String> expectedLines = new ArrayList<>();
-        expectedLines.add("Player 1 draws a 5 from deck 1");
-        expectedLines.add("Player 1 discards a 8 to deck 2");
-        expectedLines.add("Player 1 current hand is 3 5 9 2");
+        expectedLines.add("player 1 draws a 5 from deck 1");
+        expectedLines.add("player 1 discards a 8 to deck 2");
+        expectedLines.add("player 1 current hand is 3 5 9 2");
         File f = new File("player1_output.txt");
         ArrayList<String> lines = new ArrayList<>();
-        try{
+        try {
             Scanner scan = new Scanner(f);
-            while(scan.hasNextLine()){
+            while (scan.hasNextLine()) {
                 String line = scan.nextLine();
                 lines.add(line);
             }
             scan.close();
-        } catch(FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             fail("Player output file not created.");
         }
         //Compare the actual lines and expected lines of the file.
-        if(lines.size() == 3){
-            for(int i=0;i<3;i++){
+        if (lines.size() == 3) {
+            for (int i = 0; i < 3; i++) {
                 assertEquals(expectedLines.get(i), lines.get(i));
             }
-        } else{
+        } else {
+            fail("There are more than 3 lines in the output text file.");
+        }
+
+        f.delete(); //delete the file that has been created or overwritten.
+
+    }
+    //gameHasBeenWon_WinningPlayer()
+    @Test
+    @DisplayName("Ensure correct output in output file for winning player.")
+    public void gameHasBeenWon_WinningPlayer() {
+        File f = new File("player1_output.txt"); //Delete file if it already exists.
+        f.delete();
+        try{
+            player.addCard(new Card(1));
+            player.addCard(new Card(1));
+            player.addCard(new Card(1));
+            player.addCard(new Card(1));
+        } catch (Exception e) {}
+        player.gameHasBeenWon(player);
+        ArrayList<String> expectedLines = new ArrayList<>();
+        expectedLines.add("player 1 wins");
+        expectedLines.add("player 1 exits");
+        expectedLines.add("player 1 final hand: 1 1 1 1");
+        ArrayList<String> lines = new ArrayList<>();
+        try {
+            Scanner scan = new Scanner(f);
+            while (scan.hasNextLine()) {
+                String line = scan.nextLine();
+                lines.add(line);
+            }
+            scan.close();
+        } catch (FileNotFoundException e) {
+            fail("Player output file not created.");
+        }
+        //Compare the actual lines and expected lines of the file.
+        if (lines.size() == 3) {
+            for (int i = 0; i < 3; i++) {
+                assertEquals(expectedLines.get(i), lines.get(i));
+            }
+        } else {
             fail("There are more than 3 lines in the output text file.");
         }
 
         f.delete(); //delete the file that has been created or overwritten.
 
 
+
     }
+    //gameHasBeenWon_LosingPlayer()
+    @Test
+    @DisplayName("Ensure correct output in output file for losing player")
+    public void gameHasBeenwon_LosingPlayer() {
+        Player player2 = new Player(2, null, null, null, null);
+        player.gameHasBeenWon(player2);
+        ArrayList<String> expectedLines = new ArrayList<>();
+        expectedLines.add("player 1 wins");
+        expectedLines.add("player 1 exits");
+        expectedLines.add("player 1 final hand: 1 1 1 1");
+        ArrayList<String> lines = new ArrayList<>();
+        try {
+            Scanner scan = new Scanner(f);
+            while (scan.hasNextLine()) {
+                String line = scan.nextLine();
+                lines.add(line);
+            }
+            scan.close();
+        } catch (FileNotFoundException e) {
+            fail("Player output file not created.");
+        }
+        //Compare the actual lines and expected lines of the file.
+        if (lines.size() == 3) {
+            for (int i = 0; i < 3; i++) {
+                assertEquals(expectedLines.get(i), lines.get(i));
+            }
+        } else {
+            fail("There are more than 3 lines in the output text file.");
+        }
+
+        f.delete(); //delete the file that has been created or overwritten.
+    }
+    //writeIntiialHandsToFile()
+
+    //writeDeckContentsToFile()
+
+    //run_WinningInitialHand()
+
 
 }

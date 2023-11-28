@@ -39,6 +39,7 @@ public class CardDeck {
      * @return The number of cards in the deck.
      */
     public int getSize(){
+        //Size is not a constant-time action so may use synchronised method here.
         return cards.size();
     }
     /** Gets a string representation of the CardDeck instance.
@@ -46,10 +47,7 @@ public class CardDeck {
      */
     @Override
     public String toString(){
-        String s = String.format("deck%d contents: ");
-        for(Card c : this.cards){
-            s += c.getValue()+" "; //change so there isn't a space after last value.
-        }
+        String s = String.format("deck%d contents: %s", this.deckNumber, this.showDeck());
         return s;
     }
     /** Get the number associated with the deck of cards.
