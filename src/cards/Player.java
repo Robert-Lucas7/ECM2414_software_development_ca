@@ -25,7 +25,8 @@ public class Player implements Runnable, GameWonListener{
     @Override
     public void gameHasBeenWon(Player playerWhoWon){ //What to do when someone has won.
         this.gameNotFinished = false;
-        // System.out.println(this.preferredCard + "Stopping now");
+        System.out.println("HEllo");
+        System.out.println(this.preferredCard + "Stopping now");
         //Write "Player i has informed player j that player i has won" to player j's output file.
         
         try(FileWriter f = new FileWriter(String.format("player%d_output.txt", this.preferredCard),true)){
@@ -77,18 +78,19 @@ the object-oriented paradigm.
         catch(InterruptedException e){}
         
         while(this.gameNotFinished){  //Execute the game-playing strategy whilst the game has not finished...
-            try{
-                Card cardDrawn = leftDeck.remove(); //this can be null.
-                if(cardDrawn != null){ 
-                    Card cardRemoved = this.removeCard(); //SORT OUT SO PLAYERS DON'T END WITH THREE CARDS.
-                    this.addCard(cardDrawn);
-                    rightDeck.add(cardRemoved);
-                    this.writeMoveToFile(cardDrawn.getValue(), cardRemoved.getValue()); 
-                }
+            try {
                 if(this.checkIfWon()){
                     System.out.println(String.format("player %d wins", this.preferredCard));
-                    for(GameWonListener l:listeners){ //Notify the other players that someone has won the game.
+                    for (GameWonListener l : listeners) { //Notify the other players that someone has won the game.
                         l.gameHasBeenWon(this);
+                    }
+                } else {
+                    Card cardDrawn = leftDeck.remove(); //this can be null.
+                    if (cardDrawn != null) {
+                        Card cardRemoved = this.removeCard(); //SORT OUT SO PLAYERS DON'T END WITH THREE CARDS.
+                        this.addCard(cardDrawn);
+                        rightDeck.add(cardRemoved);
+                        this.writeMoveToFile(cardDrawn.getValue(), cardRemoved.getValue());
                     }
                 }
             }

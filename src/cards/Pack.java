@@ -39,7 +39,7 @@ public class Pack extends CardDeck{
                 if(this.getSize() != 8 * this.n){
                     throw new InvalidPackException();
                 }
-            } catch(Exception e){ //If there is an error reading the file
+            } catch (Exception e) { //If there is an error reading the file
                 throw new InvalidPackException();
             }
 

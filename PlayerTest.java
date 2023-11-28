@@ -3,6 +3,7 @@ import cards.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.DisplayName;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,7 +25,11 @@ public class PlayerTest {
     public void setUp(){
         deck1 = new CardDeck(1);
         deck2 = new CardDeck(2);
-        player = new Player(1, deck1, deck2, null, null);
+        CountDownLatch latch = new CountDownLatch(0);
+        Player[] listeners = new Player[1];
+        player = new Player(1, deck1, deck2, listeners, latch);
+        listeners[0] = player;
+        //System.out.println()
     }
 
     //=================================================================== AddCard =====================================================
@@ -206,7 +212,7 @@ public class PlayerTest {
     //gameHasBeenWon_WinningPlayer()
     @Test
     @DisplayName("Ensure correct output in output file for winning player.")
-    public void gameHasBeenWon_WinningPlayer() {
+    public void testGameHasBeenWon_WinningPlayer() {
         File f = new File("player1_output.txt"); //Delete file if it already exists.
         f.delete();
         try{
@@ -248,13 +254,21 @@ public class PlayerTest {
     //gameHasBeenWon_LosingPlayer()
     @Test
     @DisplayName("Ensure correct output in output file for losing player")
-    public void gameHasBeenwon_LosingPlayer() {
+    public void testGameHasBeenwon_LosingPlayer() {
+        try {
+            player.addCard(new Card(1));
+            player.addCard(new Card(2));
+            player.addCard(new Card(3));
+            player.addCard(new Card(4));
+        }
+        catch(Exception e){}
         Player player2 = new Player(2, null, null, null, null);
         player.gameHasBeenWon(player2);
+        File f = new File("player1_output.txt");
         ArrayList<String> expectedLines = new ArrayList<>();
-        expectedLines.add("player 1 wins");
+        expectedLines.add("player 2 has informed player 1 that player 2 has won");
         expectedLines.add("player 1 exits");
-        expectedLines.add("player 1 final hand: 1 1 1 1");
+        expectedLines.add("player 1 final hand: 1 2 3 4");
         ArrayList<String> lines = new ArrayList<>();
         try {
             Scanner scan = new Scanner(f);
@@ -278,10 +292,52 @@ public class PlayerTest {
         f.delete(); //delete the file that has been created or overwritten.
     }
     //writeIntiialHandsToFile()
-
+    @Test
+    @DisplayName("")
+    public void writeInitialHandsToFile() {
+        
+    }
     //writeDeckContentsToFile()
 
     //run_WinningInitialHand()
+    @Test
+    @DisplayName("Ensure game stops straight away if the initial hand is a winning hand.")
+    public void testRun_WinningInitialHand() {
+        try{
+            player.addCard(new Card(1));
+            player.addCard(new Card(1));
+            player.addCard(new Card(1));
+            player.addCard(new Card(1));
+        } catch (Exception e) {
+        }
+        player.run();
+        File f = new File("player1_output.txt");
+        ArrayList<String> expectedLines = new ArrayList<>();
+        expectedLines.add("player 1 initial hand: 1 1 1 1");
+        expectedLines.add("player 1 wins");
+        expectedLines.add("player 1 exits");
+        expectedLines.add("player 1 final hand: 1 1 1 1");
+        ArrayList<String> lines = new ArrayList<>();
+        try {
+            Scanner scan = new Scanner(f);
+            while (scan.hasNextLine()) {
+                String line = scan.nextLine();
+                lines.add(line);
+            }
+            scan.close();
+        } catch (FileNotFoundException e) {
+            fail("Player output file not created.");
+        }
+        //Compare the actual lines and expected lines of the file.
+        if (lines.size() == 4) {
+            for (int i = 0; i < 4; i++) {
+                assertEquals(expectedLines.get(i), lines.get(i));
+            }
+        } else {
+            fail("There are more than 3 lines in the output text file.");
+        }
 
+        f.delete(); //delete the file that has been created or overwritten.
+    }
 
 }

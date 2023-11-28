@@ -1,14 +1,20 @@
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.FileNotFoundException;
+
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 
+import cards.InvalidPackException;
 import cards.Pack;
 
 public class PackTest {
-    Pack pack;
+    private Pack pack;
     @BeforeEach
-    public void setup() {
+    public void setUp() {
         pack = new Pack(4);
+        System.out.println("pack");
     }
     @Test
     @DisplayName("Ensure pack is loaded correctly when given a valid file.")
@@ -28,7 +34,15 @@ public class PackTest {
     @Test
     @DisplayName("")
     public void testLoadPack_FileDoesNotExist() {
-        
+        try {
+            pack.loadPack("thisPackDoesNotExist.txt");
+            fail("Exception not thrown");
+        }
+        catch(FileNotFoundException e){
+
+        } catch (InvalidPackException e) {
+            fail("Incorrect exception thrown");
+        }
     }
 
 }
