@@ -19,20 +19,41 @@ public class PackTest {
     @Test
     @DisplayName("Ensure pack is loaded correctly when given a valid file.")
     public void testLoadPack_ValidFile() {
+        try {
+            pack.loadPack("validPack.txt");
+
+        }catch (Exception e){
+            fail("File should open fine with correct pack file");
+        }
 
     }
     @Test
-    @DisplayName("")
+    @DisplayName("Ensure a pack containing negative integers throws correct exception.")
     public void testLoadPack_NegativeIntegers() {
+        try {
+            pack.loadPack("negativePack.txt");
+            fail("File should not open an exception should be thrown");
+        }catch (InvalidPackException e){
 
+        }catch (Exception e){
+            fail("Incorrect exception is thrown.");
+        }
     }
+
     @Test
-    @DisplayName("")
+    @DisplayName("Ensure a pack without 8n rows throws correct exception.")
     public void testLoadPack_IncorrectNumberOfRows() {
+        try {
+            pack.loadPack("incorrectRowsPack.txt");
+            fail("File should not open an exception should be thrown");
+        }catch (InvalidPackException e){
 
+        }catch (Exception e){
+            fail("Incorrect exception is thrown");
+        }
     }
     @Test
-    @DisplayName("")
+    @DisplayName("Ensure FileNotFoundException is thrown when the specified pack file doesn't exist.")
     public void testLoadPack_FileDoesNotExist() {
         try {
             pack.loadPack("thisPackDoesNotExist.txt");

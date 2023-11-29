@@ -8,8 +8,6 @@ import java.util.ArrayList;
 public class Player implements Runnable, GameWonListener{
     private final ArrayList<Card> hand; //When declared as final, the arraylist's methods (add and remove) can still be called but the variable cannot be reassigned.
     private int pointer;
-
-    //https://stackoverflow.com/questions/10750791/what-is-the-sense-of-final-arraylist
     private final CardDeck leftDeck;
     private final CardDeck rightDeck;
     private final int preferredCard;
@@ -17,57 +15,49 @@ public class Player implements Runnable, GameWonListener{
     private final GameWonListener[] listeners;
     private CountDownLatch latch;
 
-    /* Method that acts as a response for when a player wins a game, so each player threads terminated elegantly.
+    /** Method that acts as a response for when a player wins a game, so each player threads terminated elegantly.
+    * @param playerWhoWon The player who has won the game.
     */
-    // =================================================================
-    // I SAW THAT SOMETIMES THE FINAL HAND IS OUTPUTTED BEFORE THE LAST PLAYERS GO.
-    //==================================================================
     @Override
-    public void gameHasBeenWon(Player playerWhoWon){ //What to do when someone has won.
+    public void gameHasBeenWon(Player playerWhoWon) { //What to do when someone has won.
         this.gameNotFinished = false;
-        System.out.println("HEllo");
-        System.out.println(this.preferredCard + "Stopping now");
         //Write "Player i has informed player j that player i has won" to player j's output file.
-        
-        try(FileWriter f = new FileWriter(String.format("player%d_output.txt", this.preferredCard),true)){
-            if(playerWhoWon.getPreferredCard() == this.preferredCard){
+
+        try (FileWriter f = new FileWriter(String.format("player%d_output.txt", this.preferredCard), true)) {
+            if (playerWhoWon.getPreferredCard() == this.preferredCard) {
                 f.write(String.format("player %d wins\n", this.preferredCard));
-            } else{
-                f.write(String.format("player %d has informed player %d that player %d has won\n", playerWhoWon.getPreferredCard(), this.preferredCard, playerWhoWon.getPreferredCard()));
+            } else {
+                f.write(String.format("player %d has informed player %d that player %d has won\n",
+                        playerWhoWon.getPreferredCard(), this.preferredCard, playerWhoWon.getPreferredCard()));
             }
-            f.write(String.format("player %d exits\n",this.preferredCard));
+            f.write(String.format("player %d exits\n", this.preferredCard));
             f.write(String.format("player %d final hand: %s\n", this.preferredCard, this.showHand()));
 
-        } catch(IOException ex){
+        } catch (IOException ex) {
 
         }
-        
 
     }
+    
+    /** Writes the player's initial hand to the player's output text file.
+     */
     private void writeInitialHandsToFile(){
         try(FileWriter f = new FileWriter(String.format("player%d_output.txt", this.preferredCard), false)){
             f.write(String.format("player %d initial hand: %s\n", this.preferredCard, this.showHand()));
         } catch(IOException e){}
     }
     
+    /** Writes the deck contents of the leftDeck variable to an output text file.
+     */
     private void writeDeckContentsToFile(){
-        try(FileWriter f = new FileWriter(String.format("deck%d_output.txt", this.leftDeck.getDeckNumber()), false)){
-            f.write(String.format("deck %d contents: %s", this.leftDeck.getDeckNumber(), this.leftDeck.showDeck()));
+        try (FileWriter f = new FileWriter(String.format("deck%d_output.txt", this.leftDeck.getDeckNumber()), false)) {
+            
+            f.write(String.format("deck%d contents: %s", this.leftDeck.getDeckNumber(), this.leftDeck.showDeck()));
         } catch(IOException e){
             e.printStackTrace();
         }
     }
-    /** Method required for the Runnable interface and implements game-playing strategy for when the player thread is started.
-     */
-    //========================================== IMPORTANT ========================================================
-    /*
-     * The combination of a card draw and a discard should be treated as a single atomic action. Therefore,
-at the end of the game every player should hold four cards. The program developed should follow
-the object-oriented paradigm.
-     * 
-     * Also, print deck contents to their own output files at the end of the game.
-     * 
-     * Due to this, check if there is a card to draw from the leftdeck before discarding a card - hence all player should end the game with 4 cards.
+    /** Method required for the Runnable interface and implements the game-playing strategy for the player for the card game.
      */
      @Override
     public void run(){
@@ -85,9 +75,9 @@ the object-oriented paradigm.
                         l.gameHasBeenWon(this);
                     }
                 } else {
-                    Card cardDrawn = leftDeck.remove(); //this can be null.
+                    Card cardDrawn = leftDeck.remove();
                     if (cardDrawn != null) {
-                        Card cardRemoved = this.removeCard(); //SORT OUT SO PLAYERS DON'T END WITH THREE CARDS.
+                        Card cardRemoved = this.removeCard();
                         this.addCard(cardDrawn);
                         rightDeck.add(cardRemoved);
                         this.writeMoveToFile(cardDrawn.getValue(), cardRemoved.getValue());
@@ -130,9 +120,8 @@ the object-oriented paradigm.
         if (this.hand.size() != 4){
             throw new Exception("Hand is not full");
         }else {
-            // System.out.println(this.hand.size() - this.pointer);
             if(!this.checkIfWon()) {
-                int index = r.nextInt(this.hand.size() - this.pointer) + this.pointer;
+                int index = r.nextInt(this.hand.size() - this.pointer) + this.pointer; // Gets an index of a random card that doesn't have the value of the preferred card of the player.
 
                 Card card1 = this.hand.remove(index);
                 return card1;
@@ -201,7 +190,7 @@ the object-oriented paradigm.
             f.close();
 
         }catch(IOException e){
-            System.out.println(e);
+            
         }
     }
     /** Gets the number of cards in the player's hand.

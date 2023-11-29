@@ -8,52 +8,42 @@ public class CardGame {
     /** The entry point for the executable
      * @param args
      */
-    public static void main(String[] args){
-/*
-            Scanner scan = new Scanner(System.in);
+    public static void main(String[] args) {
 
-            boolean validInput = false;
-            Pack pack = null;
-            String fileLocation = "pack.txt";//"CA_FINAL/pack.txt";
-            int numPlayers = 4;
-            try{
+        Scanner scan = new Scanner(System.in);
+
+        boolean validInput = false;
+        Pack pack = null;
+        String fileLocation = "";
+        int numPlayers = 2;
+        while (!validInput) { //Ask for inputs repeatedly until they are valid...
+
+            try {
+                System.out.println("Please enter the number of players:");
+
+                numPlayers = scan.nextInt();
+                if (numPlayers < 2) {
+                    throw new Exception("Invalid number of players (must be an integer greater than two).");
+                }
+                scan.nextLine();
+                System.out.println("Please enter location of pack to load:");
+                fileLocation = scan.nextLine();
                 pack = new Pack(numPlayers);
                 pack.loadPack(fileLocation);
-            } catch(Exception e){
-                e.printStackTrace();
-            }*/
-            /*
-            while(!validInput) {
+                validInput = true;
 
-                try {
-                    System.out.println("Please enter the number of players:");
-
-                    numPlayers = scan.nextInt();
-                    if (numPlayers < 2) {
-                        throw new Exception("Invalid number of players (must be an integer greater than two).");
-                    }
-                    scan.nextLine();
-                    System.out.println("Please enter location of pack to load:");
-                    fileLocation = scan.nextLine();
-                    pack = new Pack(numPlayers);
-                    pack.loadPack(fileLocation);
-                    validInput = true;
-
-                } catch (InvalidPackException e) {
-                    e.printStackTrace();
-                    System.out.printf("%s is not a valid pack file.%n", fileLocation);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    System.out.println("Pack file specified does not exist.");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("Invalid number of players (must be an integer greater than two).");
-                    scan.nextLine();
-                }
+            } catch (InvalidPackException e) {
+                System.out.printf("%s is not a valid pack file.%n", fileLocation);
+            } catch (FileNotFoundException e) {
+                System.out.println("Pack file specified does not exist.");
+            } catch (Exception e) {
+                System.out.println("Invalid number of players (must be an integer greater than two).");
+                scan.nextLine();
             }
-            scan.close();*/
+        }
+        scan.close();
 
-/*
+    
     // Initialise the player and deck arrays with the length specified by the user input for the number of players.
     Player[] players = new Player[numPlayers];
     CardDeck[] decks = new CardDeck[numPlayers];
@@ -96,8 +86,8 @@ public class CardGame {
         
      } catch(Exception e){
         e.printStackTrace();
-     }*/
-     Player[] players = {player};
-Player p = new Player(1, null, null, , );
+     }
+
+
     }
 }

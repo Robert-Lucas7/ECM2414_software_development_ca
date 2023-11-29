@@ -56,7 +56,7 @@ public class CardDeck {
     public int getDeckNumber(){
         return this.deckNumber;
     }
-    public String showDeck(){ //Ddoes the order of contents displayed matter.
+    public String showDeck(){ //Does the order of contents displayed matter.
         Iterator<Card> iterator = cards.iterator();
         String s = "";
         while(iterator.hasNext()){

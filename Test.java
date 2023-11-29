@@ -15,7 +15,7 @@ import java.util.List;
 import static org.junit.platform.engine.discovery.ClassNameFilter.includeClassNamePatterns;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
 
-public class Test { //From: https://www.baeldung.com/junit-tests-run-programmatically-from-java
+public class Test { 
     public static void main(String[] args){
         RunTest runner = new RunTest();
         runner.runAll();
@@ -32,7 +32,7 @@ public class Test { //From: https://www.baeldung.com/junit-tests-run-programmati
         }
 
     }
-    //nested inner class or standalone file??
+    
      static class RunTest {
         SummaryGeneratingListener listener = new SummaryGeneratingListener();
         public void runAll(){
